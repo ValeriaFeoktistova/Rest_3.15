@@ -60,11 +60,11 @@ public class AdminController {
     public ResponseEntity<List<Role>> getRoles() {
         return new ResponseEntity<>(roleService.getAllRoles(), HttpStatus.OK);
     }
-
+    
     @PutMapping("/users/{id}")
     public ResponseEntity<?> updateUser(@RequestBody User updatedUser, @PathVariable Long id) {
         userService.updateUser(updatedUser, id);
-        return ResponseEntity.ok(userService.findUserById(id).get());
+        return new ResponseEntity<>(userService.findUserById(id).get(), HttpStatus.OK);
     }
 
     @DeleteMapping("/users/{id}")

@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
+@Transactional(readOnly = true)
 public class UserDaoImpl implements UserDao {
 
     @PersistenceContext
@@ -27,13 +28,13 @@ public class UserDaoImpl implements UserDao {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public Optional<User> findUserById(Long id) {
         return Optional.of(Optional.ofNullable(entityManager.find(User.class, id)).orElseThrow(() -> new EntityNotFoundException(String.format("User with id - '%s' not fount", id))));
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public Optional<User> findUserByName(String name) {
         User user = entityManager
                 .createQuery("select u from User u where u.name = :username", User.class)
@@ -43,7 +44,7 @@ public class UserDaoImpl implements UserDao {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public Optional<User> findUserByEmail(String email) {
         User user = entityManager
                 .createQuery("select u from User u where u.email = :email", User.class)
@@ -53,7 +54,7 @@ public class UserDaoImpl implements UserDao {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public List<User> getAllUsers() {
         return entityManager.createQuery("select u from User u", User.class).getResultList();
     }
@@ -68,18 +69,19 @@ public class UserDaoImpl implements UserDao {
     @Override
     @Transactional
     public void removeUser(Long id) {
-        entityManager.remove(findUserById(id).get());
+        if (entityManager.find(User.class, id) == null) {
+            throw new NullPointerException("User not found");
+        }
+        entityManager.createQuery("DELETE FROM User  u WHERE u.id=:id")
+                .setParameter("id", id)
+                .executeUpdate();
     }
 
     @Override
     @Transactional
     public void updateUser(User user, Long id) {
         User userFromDB = findUserById(id).get();
-        userFromDB.setName(user.getName());
-        userFromDB.setLastName(user.getLastName());
+        entityManager.merge(user);
         userFromDB.setPassword(passwordEncoder.encode(user.getPassword()));
-        userFromDB.setEmail(user.getEmail());
-        userFromDB.setRoles(user.getRoles());
-        saveUser(userFromDB);
     }
 }
