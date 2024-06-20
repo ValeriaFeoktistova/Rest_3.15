@@ -60,7 +60,7 @@ public class AdminController {
     public ResponseEntity<List<Role>> getRoles() {
         return new ResponseEntity<>(roleService.getAllRoles(), HttpStatus.OK);
     }
-    
+
     @PutMapping("/users/{id}")
     public ResponseEntity<?> updateUser(@RequestBody User updatedUser, @PathVariable Long id) {
         userService.updateUser(updatedUser, id);
@@ -68,9 +68,9 @@ public class AdminController {
     }
 
     @DeleteMapping("/users/{id}")
-    public ResponseEntity<?> deleteUser(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         userService.removeUser(id);
-        return ResponseEntity.noContent().build();
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @PostMapping("/users")

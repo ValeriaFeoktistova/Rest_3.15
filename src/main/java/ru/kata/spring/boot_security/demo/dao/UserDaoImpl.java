@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-@Transactional(readOnly = true)
 public class UserDaoImpl implements UserDao {
 
     @PersistenceContext
@@ -28,13 +27,11 @@ public class UserDaoImpl implements UserDao {
     }
 
     @Override
-    @Transactional
     public Optional<User> findUserById(Long id) {
         return Optional.of(Optional.ofNullable(entityManager.find(User.class, id)).orElseThrow(() -> new EntityNotFoundException(String.format("User with id - '%s' not fount", id))));
     }
 
     @Override
-    @Transactional
     public Optional<User> findUserByName(String name) {
         User user = entityManager
                 .createQuery("select u from User u where u.name = :username", User.class)
@@ -44,7 +41,6 @@ public class UserDaoImpl implements UserDao {
     }
 
     @Override
-    @Transactional
     public Optional<User> findUserByEmail(String email) {
         User user = entityManager
                 .createQuery("select u from User u where u.email = :email", User.class)
@@ -54,20 +50,17 @@ public class UserDaoImpl implements UserDao {
     }
 
     @Override
-    @Transactional
     public List<User> getAllUsers() {
         return entityManager.createQuery("select u from User u", User.class).getResultList();
     }
 
     @Override
-    @Transactional
     public void saveUser(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         entityManager.persist(user);
     }
 
     @Override
-    @Transactional
     public void removeUser(Long id) {
         if (entityManager.find(User.class, id) == null) {
             throw new NullPointerException("User not found");
@@ -78,7 +71,6 @@ public class UserDaoImpl implements UserDao {
     }
 
     @Override
-    @Transactional
     public void updateUser(User user, Long id) {
         User userFromDB = findUserById(id).get();
         entityManager.merge(user);
